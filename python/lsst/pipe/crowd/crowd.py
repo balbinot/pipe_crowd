@@ -50,13 +50,6 @@ class CrowdedFieldConnections(pipeBase.PipelineTaskConnections, dimensions=("ins
         dimensions=("instrument", "visit", "detector")
     )
 
-    crowdedFieldModelFirst = cT.Output(
-        doc="Model image from first pass alone",
-        name="pipeCrowd_model_first",
-        storageClass="ExposureF",
-        dimensions=("instrument", "visit", "detector")
-    )
-
 
 class CrowdedFieldTaskConfig(pipeBase.PipelineTaskConfig, pipelineConnections=CrowdedFieldConnections):
     """Config for CrowdedFieldTask"""
