@@ -50,6 +50,13 @@ class CrowdedFieldConnections(pipeBase.PipelineTaskConnections, dimensions=("ins
         dimensions=("instrument", "visit", "detector")
     )
 
+    crowdedFieldModelFirst = cT.Output(
+        doc="Model image from first pass alone",
+        name="pipeCrowd_model_first",
+        storageClass="ExposureF",
+        dimensions=("instrument", "visit", "detector")
+    )
+
 
 class CrowdedFieldTaskConfig(pipeBase.PipelineTaskConfig, pipelineConnections=CrowdedFieldConnections):
     """Config for CrowdedFieldTask"""
@@ -141,6 +148,7 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
         for detection_round in range(1, self.config.num_iterations + 1):
 
             detection_catalog = afwTable.SourceCatalog(self.schema)
+            print("AAAA", detection_catalog)
             if(len(source_catalog) > 0):
                 residual_exposure = afwImage.ExposureF(exposure, deep=True)
 
