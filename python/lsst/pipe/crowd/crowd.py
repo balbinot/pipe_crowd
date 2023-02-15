@@ -135,7 +135,7 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
 
         self.makeSubtask("detection", schema=self.schema)
         self.makeSubtask("centroid", schema=self.schema)
-        self.makeSubtask("installSimplePsf", schema=self.schema)
+        self.makeSubtask("installSimplePsf")
         self.makeSubtask("modelImageTask")
 
     def runQuantum(self, butlerQC, inputRefs, outputRefs):
