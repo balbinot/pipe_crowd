@@ -194,8 +194,8 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
     
                 #Estimate FWHM from original PSF 
                 my, mx = t.shape
-                psfy = psfimg[my//2,:]
-                psfx = psfimg[:,mx//2]
+                psfy = t[my//2,:]
+                psfx = t[:,mx//2]
                 idx = np.arange(my)
                 hmx = half_max_x(idx, psfy)
                 fwhm = hmx[1] - hmx[0]
