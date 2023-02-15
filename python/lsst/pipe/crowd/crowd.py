@@ -16,6 +16,19 @@ from scipy.spatial import cKDTree
 import pickle
 #from lsst.pipe.tasks.characterizeImage import CharacterizeImageTask, CharacterizeImageConfig
 from lsst.meas.algorithms.installGaussianPsf import InstallGaussianPsfTask
+from astropy.modeling import models, fitting
+
+def lin_interp(x, y, i, half):
+    return x[i] + (x[i+1] - x[i]) * ((half - y[i]) / (y[i+1] - y[i]))
+
+def half_max_x(x, y):
+    half = (np.max(y)-np.min(y))/2.0 + np.min(y)
+    signs = np.sign(np.add(y, -half))
+    zero_crossings = (signs[0:-2] != signs[1:-1])
+    zero_crossings_i = np.where(zero_crossings)[0]
+    return [lin_interp(x, y, zero_crossings_i[0], half),
+            lin_interp(x, y, zero_crossings_i[1], half)]
+
 
 
 from .crowdedFieldMatrix import CrowdedFieldMatrix
@@ -178,6 +191,17 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                 with open('psf_original.bin', 'wb') as f:
                     t = residual_exposure.getPsf().computeImage().array
                     pickle.dump(t, f)
+    
+                #Estimate FWHM from original PSF 
+                my, mx = t.shape
+                psfy = psfimg[my//2,:]
+                psfx = psfimg[:,mx//2]
+                idx = np.arange(my)
+                hmx = half_max_x(idx, psfy)
+                fwhm = hmx[1] - hmx[0]
+                self.log.info(f"Estimated FWHM from original PSF is: {fwhm}")
+                self.config.installSimplePsf.fwhm.set(fwhm)
+
                 self.installSimplePsf.run(exposure=residual_exposure)
                 with open('psf_simple.bin', 'wb') as f:
                     t = residual_exposure.getPsf().computeImage().array
