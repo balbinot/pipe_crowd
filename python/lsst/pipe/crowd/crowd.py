@@ -200,7 +200,7 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                 hmx = half_max_x(idx, psfy)
                 fwhm = hmx[1] - hmx[0]
                 self.log.info(f"Estimated FWHM from original PSF is: {fwhm}")
-                self.config.installSimplePsf.fwhm.set(fwhm)
+                self.config.installSimplePsf.fwhm = fwhm
 
                 self.installSimplePsf.run(exposure=residual_exposure)
                 with open('psf_simple.bin', 'wb') as f:
