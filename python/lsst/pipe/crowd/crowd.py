@@ -14,7 +14,7 @@ from scipy.spatial import cKDTree
 
 ## Debugging imports
 import pickle
-from lsst.pipe.tasks.characterizeImage import CharacterizeImageTask, CharacterizeImageConfig
+#from lsst.pipe.tasks.characterizeImage import CharacterizeImageTask, CharacterizeImageConfig
 from lsst.meas.algorithms.installGaussianPsf import InstallGaussianPsfTask
 
 
