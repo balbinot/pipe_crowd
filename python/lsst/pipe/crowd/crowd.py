@@ -175,10 +175,10 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                 model_significance_image = None
                 # On the first run, try using simple PSF! This is a hack.
                 with open('psf_original.bin', 'wb') as f:
-                    pickle.dump(residual_exposure.getPsf())
+                    pickle.dump(residual_exposure.getPsf(), f)
                 installSimplePsf.run(exposure=residual_exposure)
                 with open('psf_simple.bin', 'wb') as f:
-                    pickle.dump(residual_exposure.getPsf())
+                    pickle.dump(residual_exposure.getPsf(), f)
 
             detRes = self.detection.run(detection_catalog, residual_exposure)
 
