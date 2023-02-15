@@ -14,7 +14,7 @@ from scipy.spatial import cKDTree
 
 ## Debugging imports
 import pickle
-#from lsst.pipe.tasks.characterizeImage import CharacterizeImageTask, CharacterizeImageConfig
+from lsst.pipe.tasks.characterizeImage import CharacterizeImageTask, CharacterizeImageConfig
 from lsst.meas.algorithms.installGaussianPsf import InstallGaussianPsfTask
 from astropy.modeling import models, fitting
 
@@ -85,6 +85,11 @@ class CrowdedFieldTaskConfig(pipeBase.PipelineTaskConfig, pipelineConnections=Cr
     installSimplePsf = pexConfig.ConfigurableField(
         target=InstallGaussianPsfTask,
         doc="Install a simple PSF model",
+    )
+
+    characterize = pexConfig.ConfigurableField(
+        target=CharacterizeImageTask,
+        doc="Characterize image"
     )
 
     modelImageTask = pexConfig.ConfigurableField(
@@ -202,7 +207,10 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                 self.log.info(f"Estimated FWHM from original PSF is: {fwhm}")
                 #self.config.installSimplePsf.fwhm = fwhm
 
-                self.installSimplePsf.run(exposure=residual_exposure)
+                #self.installSimplePsf.run(exposure=residual_exposure)
+
+                self.characterize.run(residual_exposure) ## Test simple rerun on 1st iter.
+
                 with open('psf_simple.bin', 'wb') as f:
                     t = residual_exposure.getPsf().computeImage().array
                     pickle.dump(t, f)
