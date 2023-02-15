@@ -12,10 +12,11 @@ from lsst.utils.timer import timeMethod
 
 from scipy.spatial import cKDTree
 
-
 ## Debugging imports
 import pickle
-
+from lsst.pipe.tasks.characterizeImage import CharacterizeImageTask, CharacterizeImageConfig
+from lsst.pipe.tasks.characterizeImage import measurePsfTask, measurePsfConfig
+from lsst.meas.algorithms.installGaussianPsf import InstallGaussianPsfTask
 
 
 from .crowdedFieldMatrix import CrowdedFieldMatrix
@@ -67,6 +68,11 @@ class CrowdedFieldTaskConfig(pipeBase.PipelineTaskConfig, pipelineConnections=Cr
     detection = pexConfig.ConfigurableField(
             target=SourceDetectionTask,
             doc="Detect sources"
+    )
+
+    installSimplePsf = pexConfig.ConfigurableField(
+        target=InstallGaussianPsfTask,
+        doc="Install a simple PSF model",
     )
 
     modelImageTask = pexConfig.ConfigurableField(
@@ -151,9 +157,6 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
 
                 residual_exposure = afwImage.ExposureF(exposure, deep=True)
 
-                with open(f"res_exp_{detection_round}.bin", "wb") as f: 
-                    pickle.dump(residual_exposure.getImage(), f)
-
                 # This subtracts the model from its input in place.
                 # Needs to have a better name than just run.
                 model_image = self.modelImageTask.run(residual_exposure,
@@ -171,6 +174,12 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                 residual_exposure = exposure
                 model_image = None
                 model_significance_image = None
+                # On the first run, try using simple PSF! This is a hack.
+                with open('psf_original.bin', 'wb') as f:
+                    pickle.dump(residual_exposure.getPsf())
+                installSimplePsf.run(exposure=residual_exposure)
+                with open('psf_simple.bin', 'wb') as f:
+                    pickle.dump(residual_exposure.getPsf())
 
             detRes = self.detection.run(detection_catalog, residual_exposure)
 
