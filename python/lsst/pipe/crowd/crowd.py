@@ -13,6 +13,11 @@ from lsst.utils.timer import timeMethod
 from scipy.spatial import cKDTree
 
 
+## Debugging imports
+import pickle
+
+
+
 from .crowdedFieldMatrix import CrowdedFieldMatrix
 from .modelImage import ModelImageTask, ModelImageTaskConfig
 from .centroid import CrowdedCentroidTask, CrowdedCentroidTaskConfig
@@ -140,10 +145,14 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
 
         for detection_round in range(1, self.config.num_iterations + 1):
 
-            detection_catalog = afwTable.SourceCatalog(self.schema)
-            print("AAAA", detection_catalog)
+            detection_catalog = afwTable.SourceCatalog(self.schema) ## Empty catalog for 1st round
+
             if(len(source_catalog) > 0):
+
                 residual_exposure = afwImage.ExposureF(exposure, deep=True)
+
+                with open(f"res_exp_{detection_round}.bin", "wb") as f: 
+                    pickle.dump(residual_exposure.getImage(), f)
 
                 # This subtracts the model from its input in place.
                 # Needs to have a better name than just run.
