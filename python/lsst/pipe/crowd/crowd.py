@@ -178,7 +178,7 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                 with open('psf_original.bin', 'wb') as f:
                     t = residual_exposure.getPsf().computeImage().array
                     pickle.dump(t, f)
-                installSimplePsf.run(exposure=residual_exposure)
+                self.installSimplePsf.run(exposure=residual_exposure)
                 with open('psf_simple.bin', 'wb') as f:
                     t = residual_exposure.getPsf().computeImage().array
                     pickle.dump(t, f)
