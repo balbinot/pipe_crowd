@@ -130,7 +130,9 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
 
     def setDefaults(self):
         super().setDefaults()
+        ## Parameters are frozen here, add any changes below
         self.detection.thresholdPolarity = "positive"
+        self.config.installSimplePsf.fwhm = 5.3
 
     def __init__(self, **kwargs):
         pipeBase.PipelineTask.__init__(self, **kwargs)
@@ -200,7 +202,6 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                 hmx = half_max_x(idx, psfy)
                 fwhm = hmx[1] - hmx[0]
                 self.log.info(f"Estimated FWHM from original PSF is: {fwhm}")
-                #self.config.installSimplePsf.fwhm = fwhm
 
                 self.installSimplePsf.run(exposure=residual_exposure)
                 with open('psf_simple.bin', 'wb') as f:
