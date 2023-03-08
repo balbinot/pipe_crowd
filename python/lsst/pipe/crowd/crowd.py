@@ -134,7 +134,9 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
     _DefaultName = "crowdedFieldTask"
 
     def setDefaults(self):
+        # Go crazy on defaults here
         super().setDefaults()
+        self.characterizeImage.installSimplePsf.fwhm = 5.25 
         self.detection.thresholdPolarity = "positive"
 
     def __init__(self, **kwargs):
@@ -226,7 +228,7 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                     if model_image is not None:
                         # Add a 1e-6 epsilon to prevent divide-by-zero
                         model_sig = model_significance_image.getImage()[peak.getF()] + 1e-6
-                        value_ratio = peak.getPeakValue()/model_sig
+                        value_ratio = peak.getPeakValue()/model_sig #?? 
                         if(value_ratio < self.config.peak_significance_cutoff):
                             continue
                     child = source_catalog.addNew()
@@ -266,6 +268,7 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
             # This is pretty ad hoc.
             centroid_tree = cKDTree(np.stack([source_catalog['centroid_x'], source_catalog['centroid_y']], axis=1))
 
+            ## EB: Check this
             # TODO: better handle the case of three+ sources inside the matching radius.
             records_to_delete = set(j for (i,j) in centroid_tree.query_pairs(self.config.minCentroidSeparation))
             if(len(records_to_delete) == 0):
