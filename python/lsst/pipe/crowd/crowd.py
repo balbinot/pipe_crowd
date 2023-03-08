@@ -210,10 +210,8 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                 #    pickle.dump(t, f)
 
             detRes = self.detection.run(detection_catalog, residual_exposure)
-            #img = calexp.getMaskedImage().getImage().array
-            #mimg = crowd_model.getImage().array
 
-            detection_catalog.asAstropy().write(f'detection_catalogue_{detection_round}.hdf5', overwrite=True)
+            source_catalog.asAstropy().write(f'detection_catalogue_{detection_round}.hdf5', overwrite=True)
             with open(f'image_{detection_round}.bin', 'wb') as f:
                 pickle.dump(residual_exposure.getMaskedImage().getImage().array, f)
 
@@ -308,6 +306,9 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                                               self.simultaneousPsfFlux_key)
 
         model_exposure = afwImage.ExposureF(model_image, wcs=exposure.getWcs())
+
+
+
 
         return pipeBase.Struct(crowdedFieldCat=source_catalog,
                                crowdedFieldResidual=exposure,
