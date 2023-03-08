@@ -203,24 +203,34 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                 fwhm = hmx[1] - hmx[0]
                 self.log.info(f"Estimated FWHM from original PSF is: {fwhm}")
 
-                self.installSimplePsf.run(exposure=residual_exposure)
-                with open('psf_simple.bin', 'wb') as f:
-                    t = residual_exposure.getPsf().computeImage().array
-                    pickle.dump(t, f)
+                ## Run with simple PSF?? Not much effect! 
+                #self.installSimplePsf.run(exposure=residual_exposure)
+                #with open('psf_simple.bin', 'wb') as f:
+                #    t = residual_exposure.getPsf().computeImage().array
+                #    pickle.dump(t, f)
 
             detRes = self.detection.run(detection_catalog, residual_exposure)
+            #img = calexp.getMaskedImage().getImage().array
+            #mimg = crowd_model.getImage().array
+
+            detection_catalog.asAstropy().write(f'detection_catalogue_{detection_round}.hdf5', overwrite=True)
+            with open(f'image_{detection_round}.bin', 'wb') as f:
+                pickle.dump(residual_exposure.getMaskedImage().getImage().array, f)
 
             for source in detRes.sources:
                 for peak in source.getFootprint().peaks:
 
-                    # If this is round >=2, short circuit on insignificant
-                    # peaks.
-                    if model_image is not None:
-                        # Add a 1e-6 epsilon to prevent divide-by-zero
-                        model_sig = model_significance_image.getImage()[peak.getF()] + 1e-6
-                        value_ratio = peak.getPeakValue()/model_sig
-                        if(value_ratio < self.config.peak_significance_cutoff):
-                            continue
+                    # Avoid peaks in bad (=interpolated) pixels 
+                    if residual_exposure.getMaskedImage().getMask().array[int(peak.getFy()),int(peak.getFx())]&(2**2) != 4:
+
+                        # If this is round >=2, short circuit on insignificant
+                        # peaks.
+                        if model_image is not None:
+                            # Add a 1e-6 epsilon to prevent divide-by-zero
+                            model_sig = model_significance_image.getImage()[peak.getF()] + 1e-6
+                            value_ratio = peak.getPeakValue()/model_sig
+                            if(value_ratio < self.config.peak_significance_cutoff):
+                                continue
                     child = source_catalog.addNew()
                     child['coarse_centroid_x'] = peak.getFx()
                     child['coarse_centroid_y'] = peak.getFy()
