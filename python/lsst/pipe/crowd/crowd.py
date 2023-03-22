@@ -211,6 +211,7 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
 
             detRes = self.detection.run(detection_catalog, residual_exposure)
 
+            # Careful, source_catalog is empty here!!
             source_catalog.asAstropy().write(f'detection_catalogue_{detection_round}.hdf5', overwrite=True)
             with open(f'image_{detection_round}.bin', 'wb') as f:
                 pickle.dump(residual_exposure.getMaskedImage().getImage().array, f)
@@ -244,8 +245,11 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                 self.log.error(f"Matrix solution failed on iteration {detection_round} solve 1")
                 return None
 
+            #slot_Centroid is a POINTER! Used by centroid.run() to run it.
             source_catalog.schema.getAliasMap().set("slot_Centroid",
                                                     "coarse_centroid")
+            
+            source_catalog.asAstropy().write(f'detection_catalogue_before_centroid_{detection_round}.hdf5', overwrite=True)
 
             self.centroid.run(exposure, source_catalog,
                          self.simultaneousPsfFlux_key)
@@ -254,6 +258,8 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
             # SdssCentroid values.
             source_catalog.schema.getAliasMap().set("slot_Centroid",
                                                     "centroid")
+
+            source_catalog.asAstropy().write(f'detection_catalogue_after_centroid_{detection_round}.hdf5', overwrite=True)
 
             # Sometimes centroiding results in nans, which break cKDTree
             for n in range(len(source_catalog))[::-1]:
