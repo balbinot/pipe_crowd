@@ -249,7 +249,8 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
             source_catalog.schema.getAliasMap().set("slot_Centroid",
                                                     "coarse_centroid")
             
-            source_catalog.asAstropy().write(f'detection_catalogue_before_centroid_{detection_round}.hdf5', overwrite=True)
+#            source_catalog.asAstropy().write(f'detection_catalogue_before_centroid_{detection_round}.hdf5',
+        #                    overwrite=True)
 
             self.centroid.run(exposure, source_catalog,
                          self.simultaneousPsfFlux_key)
@@ -259,7 +260,8 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
             source_catalog.schema.getAliasMap().set("slot_Centroid",
                                                     "centroid")
 
-            source_catalog.asAstropy().write(f'detection_catalogue_after_centroid_{detection_round}.hdf5', overwrite=True)
+            #source_catalog.asAstropy().write(f'detection_catalogue_after_centroid_{detection_round}.hdf5',
+                    #        overwrite=True)
 
             # Sometimes centroiding results in nans, which break cKDTree
             for n in range(len(source_catalog))[::-1]:
