@@ -264,7 +264,6 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
 
 #            source_catalog.asAstropy().write(f'detection_catalogue_after_centroid_{detection_round}.hdf5',
         #                           overwrite=True, serialize_meta=True)
-            source_catalog.writeFits(f'detection_catalogue_after_centroid_{detection_round}.fits')
 
             # Sometimes centroiding results in nans, which break cKDTree
             for n in range(len(source_catalog))[::-1]:
@@ -276,6 +275,8 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
             # Delete sources with centroids that are too close together.
             # This is pretty ad hoc.
             centroid_tree = cKDTree(np.stack([source_catalog['centroid_x'], source_catalog['centroid_y']], axis=1))
+
+            source_catalog.writeFits(f'detection_catalogue_after_centroid_{detection_round}.fits')
 
             # TODO: better handle the case of three+ sources inside the matching radius.
             records_to_delete = set(j for (i,j) in centroid_tree.query_pairs(self.config.minCentroidSeparation))
