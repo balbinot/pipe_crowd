@@ -284,6 +284,8 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
             # This is pretty ad hoc.
             centroid_tree = cKDTree(np.stack([source_catalog['centroid_x'], source_catalog['centroid_y']], axis=1))
 
+            source_catalog.writeFits(f'detection_catalogue_before_kdtree_{detection_round}.fits')
+
             # TODO: better handle the case of three+ sources inside the matching radius.
             records_to_delete = set(j for (i,j) in centroid_tree.query_pairs(self.config.minCentroidSeparation))
             if(len(records_to_delete) == 0):
@@ -295,6 +297,8 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                     del source_catalog[n]
 
                 source_catalog = source_catalog.copy(deep=True)
+
+            source_catalog.writeFits(f'detection_catalogue_after_kdtree_{detection_round}.fits')
 
             double_check_for_pairs = True
             if double_check_for_pairs:
