@@ -276,7 +276,7 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                     source_catalog[n]['centroid_y'] = source_catalog[n]['coarse_centroid_y'] 
                     #del source_catalog[n]
 
-            source_catalog = source_catalog.copy(deep=True) ## This is to ensure memory contriguity.
+            source_catalog = source_catalog.copy(deep=True) ## This is to ensure memory contiguity.
 
             # Delete sources with centroids that are too close together.
             # This is pretty ad hoc.
