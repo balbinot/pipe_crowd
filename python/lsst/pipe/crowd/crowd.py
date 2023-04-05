@@ -269,6 +269,8 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
         #                           overwrite=True, serialize_meta=True)
 
             # Sometimes centroiding results in nans, which break cKDTree
+            # EB: centroiding is not working well, returns empty column and/or
+            #     does not properly copy memory slot.
             for n in range(len(source_catalog))[::-1]:
                 if((not np.isfinite(source_catalog[n]['centroid_x'])) or
                    (not np.isfinite(source_catalog[n]['centroid_y']))):
@@ -282,8 +284,6 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
             # This is pretty ad hoc.
             centroid_tree = cKDTree(np.stack([source_catalog['centroid_x'], source_catalog['centroid_y']], axis=1))
 
-            source_catalog.writeFits(f'detection_catalogue_after_centroid_kdtree_{detection_round}.fits')
-
             # TODO: better handle the case of three+ sources inside the matching radius.
             records_to_delete = set(j for (i,j) in centroid_tree.query_pairs(self.config.minCentroidSeparation))
             if(len(records_to_delete) == 0):
@@ -295,7 +295,6 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                     del source_catalog[n]
 
                 source_catalog = source_catalog.copy(deep=True)
-
 
             double_check_for_pairs = True
             if double_check_for_pairs:
@@ -324,9 +323,6 @@ class CrowdedFieldTask(pipeBase.PipelineTask):
                                               self.simultaneousPsfFlux_key)
 
         model_exposure = afwImage.ExposureF(model_image, wcs=exposure.getWcs())
-
-
-
 
         return pipeBase.Struct(crowdedFieldCat=source_catalog,
                                crowdedFieldResidual=exposure,
